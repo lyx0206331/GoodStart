@@ -1,0 +1,129 @@
+apply plugin: 'com.android.application'
+
+android {
+    compileSdkVersion 23
+    buildToolsVersion "23.0.2"
+
+    defaultConfig {
+        applicationId "com.adrian.goodstart"
+        minSdkVersion 15
+        targetSdkVersion 23
+        versionCode 1
+        versionName "1.0"
+    }
+    //执行lint检查，有任何的错误或者警告提示，都会终止构建，我们可以将其关掉。
+    lintOptions {
+        abortOnError false
+    }
+
+    //签名
+    signingConfigs {
+        debug {
+//            storeFile file("C:/Users/卿/.android/debug.keystore")
+//            storeFile file("/Users/ranqing/.android/debug.keystore")
+            storeFile file("/home/adrian/.android/debug.keystore")
+
+        }
+        release {
+            //这样写就得把签名文件放在项目目录
+//            storeFile file("D:/workspace/appkey.keystore")
+//            storeFile file("/Users/ranqing/Documents/android-sdk-mac_android_studio/appkey.keystore")
+            storeFile file("/home/adrian/Android/appkey.keystore")
+            storePassword "lengyuxuan1534."
+            keyAlias "adrian_keystore"
+            keyPassword "lengyuxuan1534."
+        }
+    }
+
+    buildTypes {
+        debug {
+            // 显示Log
+            buildConfigField "boolean", "LOG_DEBUG", "true"
+
+            versionNameSuffix "-debug"
+            minifyEnabled false
+            zipAlignEnabled false
+            shrinkResources false
+            signingConfig signingConfigs.debug
+        }
+
+        release {
+            // 不显示Log
+            buildConfigField "boolean", "LOG_DEBUG", "false"
+            //Zipalign优化
+            zipAlignEnabled true
+            // 移除无用的resource文件
+            shrinkResources true
+            //签名
+            signingConfig signingConfigs.release
+            //混淆
+            minifyEnabled false
+            //前一部分代表系统默认的android程序的混淆文件，该文件已经包含了基本的混淆声明
+            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+        }
+    }
+
+    //渠道Flavors，配置不同风格的app
+    productFlavors {
+        "default" {}
+//        GooglePlay {}
+//        google {}
+//        "91" {}
+//        hiapk {}
+//        gfan {}
+//        goapk {}
+//        appChina {}
+//        mumayi {}
+//        eoe {}
+//        nduo {}
+//        feiliu {}
+//        crossmo {}
+//        huawei {}
+//        QQ {}
+//        "3G" {}
+//        "360" {}
+//        baidu {}
+//        sohu {}
+//        "163" {}
+//        UC {}
+//        dangle {}
+//        samsung {}
+//        mmw {}
+//        xiaomi {}
+//        lenovo {}
+//        nearme {}
+//        wandoujia {}
+    }
+    //批量配置
+    productFlavors.all { flavor ->
+        flavor.manifestPlaceholders = [UMENG_CHANNEL_VALUE: name]
+    }
+//
+//    compileOptions {
+//        sourceCompatibility JavaVersion.VERSION_1_7
+//        targetCompatibility JavaVersion.VERSION_1_7
+//    }
+
+    applicationVariants.all { variant ->
+        variant.outputs.each { output ->
+            def outputFile = output.outputFile
+            if (outputFile != null && outputFile.name.endsWith('.apk')) {
+                def fileName = "GoodStart4phone_v${defaultConfig.versionName}_${releaseTime()}_${variant.productFlavors[0].name}.apk"
+                output.outputFile = new File(outputFile.parent, fileName)
+            }
+        }
+    }
+}
+
+def releaseTime() {
+    return new Date().format("yyyy-MM-dd", TimeZone.getTimeZone("GMT"))
+}
+
+dependencies {
+    compile fileTree(dir: 'libs', include: ['*.jar'])
+    testCompile 'junit:junit:4.12'
+    compile 'com.android.support:appcompat-v7:23.2.1'
+    compile 'com.android.support:support-v4:23.2.1'
+    compile 'de.greenrobot:greendao:2.1.0'
+    compile 'com.umeng.analytics:analytics:latest.integration'
+}

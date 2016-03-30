@@ -1,0 +1,16 @@
+<resources>
+    <string name="app_name">GoodStart</string>
+
+    <string name="settings">设置遥控器网络</string>
+    <string name="conn_remote_ctrl">连接遥控器</string>
+    <string name="turn_on">开</string>
+    <string name="turn_off">关</string>
+    <string name="share_pic">分享图片</string>
+
+    <string name="dev_name">设备名称</string>
+    <string name="dev_pwd">设备密码</string>
+    <string name="conn_dev">连接设备</string>
+    <string name="wifi_name">网络名称</string>
+    <string name="wifi_pwd">网络密码</string>
+    <string name="dev_conn_wifi">设备连接网络</string>
+</resources>
