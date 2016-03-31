@@ -7,7 +7,6 @@ import android.net.wifi.ScanResult;
 import android.net.wifi.WifiInfo;
 import android.net.wifi.WifiManager;
 import android.os.Handler;
-import android.text.TextUtils;
 import android.text.format.Formatter;
 import android.util.Log;
 
@@ -306,10 +305,12 @@ public class ConnetListening {
 	}
 
 	public void SendCmdCode(int code,byte[] buff,int len,String ip){
-		Log.e(TAG, "SendCmdCode > cmd:"+String.valueOf(code) + " ip:" + ip + " ::: wifi ssid :" + mWifiInfo.getSSID());
+//		mwifiAdmin = new WifiAdmin(context);
+		mWifiInfo = mwifiAdmin.getWifiInfo();
+		Log.e(TAG, "SendCmdCode > cmd:"+String.valueOf(code) + " --- ip : " + ip);
 		if(mCmdState != CMDSTATE_SENGSUCCESS)return;
 		if(mlistenState != LISTENING_CONNECTED)return;
-		if(TextUtils.isEmpty(ip)){
+		if(ip.equals("")||ip == null){
 			Log.e(TAG, "SendCmdCode > ip:"+ip+"空！");
 			return;
 		}else if(ip.equals("0.0.0.0")||mWifiInfo.getSSID().contains("IYK_")){

@@ -4,18 +4,23 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.net.ConnectivityManager;
+import android.os.Handler;
+import android.os.Message;
 import android.text.TextUtils;
 
+import com.adrian.goodstart.activity.ActivityMain;
 import com.adrian.goodstart.service.MyService;
-import com.adrian.goodstart.tool.CmdUtil;
+import com.adrian.goodstart.tool.CmdUtil2;
 import com.adrian.goodstart.tool.CommUtils;
 import com.adrian.goodstart.tool.Constants;
+import com.adrian.goodstart.tool.DataUtil;
 import com.adrian.goodstart.tool.NetTool;
 
 
 public class MyReceiver extends BroadcastReceiver {
 
-    private CmdUtil util;
+    private DataUtil dataUtil;
+    private CmdUtil2 cmdUtil;
 
     public MyReceiver() {
     }
@@ -26,7 +31,10 @@ public class MyReceiver extends BroadcastReceiver {
             Constants.curMillis = System.currentTimeMillis();
             if (CommUtils.getWifiStatus(context)) {
                 CommUtils.showToast(context, "wifi已连接");
-                startScan(context);
+                String ssid = CommUtils.getWifiName(context);
+                if (!ssid.contains("IYK")) {
+                    startScan(context);
+                }
             } else {
                 CommUtils.showToast(context, "WIFI未连接");
             }
@@ -37,31 +45,22 @@ public class MyReceiver extends BroadcastReceiver {
     }
 
     private void startScan(Context context) {
-//        if (!TextUtils.isEmpty(CmdUtil.getInstance(context).getSsid())) {
-//            CmdUtil.getInstance(context).connDevice(CmdUtil.getInstance(context).getSsid());
-//        }
+//
 
-//        CmdUtil.getInstance(context).setBshortredid(R.id.button_shortredA);
-//        if(CmdUtil.getInstance(context).isBshortredflagA()){
-//            CmdUtil.getInstance(context).sendCmdCode(0x32, CmdUtil.shortredcodeA, CmdUtil.shortredcodeA.length, CmdUtil.getInstance(context).getIp());
-//        } else {
-//            CommUtils.showToast(context, "未学习开机功能，请打开应用先学习该功能");
-//        }
-
-        if (util == null) {
-            util = new CmdUtil(context);
+        if (dataUtil == null) {
+            dataUtil = new DataUtil(context);
         }
 
-        if (util.isConnectedDev()) {
-            byte[] cmd = util.getCmdBytes(0);
-            String ip = util.getIp();
-            if (cmd != null && cmd.length > 0) {
-                util.sendCmdCode(0x32, cmd, cmd.length, ip);
+        String ip = dataUtil.getIp();
+        if (TextUtils.isEmpty(ip)) {
+            CommUtils.showToast(context, "请先连接设备");
+        } else {
+            byte[] cmdBytes = dataUtil.getCmdBytes(0);
+            if (cmdBytes != null && cmdBytes.length > 0) {
+                ActivityMain.mConnetListening.SendCmdCode(0x32, cmdBytes, cmdBytes.length, ip);
             } else {
                 CommUtils.showToast(context, "请先学习指令");
             }
-        } else {
-            CommUtils.showToast(context, "请先连接设备");
         }
 
         NetTool tool = new NetTool(context);

@@ -24,7 +24,9 @@ public class CmdCheck {
 		//Log.e("CmdCheck", "getCmd"+":"+String.valueOf((buf[9]*256+buf[10])));
 		if((buf[9]*256+buf[10])<0x80)return buf[9]*256+buf[10];
 		if(getCmdState() == 0){
-			return buf[9]*256+buf[10];
+			int cmd = buf[9]*256+buf[10];
+			LogUtil.e("TAG", "get cmd value : " + cmd);
+			return cmd;
 		}else{
 			return 0;
 		}

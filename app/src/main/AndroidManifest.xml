@@ -23,19 +23,32 @@
         android:theme="@style/AppTheme">
         <meta-data
             android:name="UMENG_APPKEY"
-            android:value="56f101ef67e58e5a6d000c78" />
+            android:value="56fbd80067e58eb19b0003ed" />
         <meta-data
             android:name="UMENG_CHANNEL"
-            android:value="wuhandemo4phone" />
+            android:value="GoodStartClient" />
 
-        <activity android:name=".activity.MainActivity"
+        <!--<activity android:name=".activity.MainActivity"
             android:screenOrientation="portrait">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
+        </activity>-->
+        <activity
+            android:name=".activity.ActivityMain"
+            android:label="@string/app_name"
+            android:screenOrientation="portrait">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
         </activity>
+
+        <activity
+            android:name=".activity.ActivityNet"
+            android:screenOrientation="portrait"></activity>
         <activity android:name=".activity.SettingsActivity"
             android:screenOrientation="portrait"></activity>
 

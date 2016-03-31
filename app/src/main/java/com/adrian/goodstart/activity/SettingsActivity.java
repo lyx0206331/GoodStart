@@ -9,10 +9,9 @@ import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.net.wifi.ScanResult;
 import android.net.wifi.WifiManager;
+import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
-import android.support.v7.app.AppCompatActivity;
-import android.os.Bundle;
 import android.text.TextUtils;
 import android.util.Log;
 import android.view.View;
@@ -25,7 +24,6 @@ import android.widget.Toast;
 
 import com.adrian.goodstart.R;
 import com.adrian.goodstart.tool.CmdCheck;
-import com.adrian.goodstart.tool.CmdUtil;
 import com.adrian.goodstart.tool.CommUtils;
 import com.adrian.goodstart.tool.ConnetListening;
 
@@ -54,8 +52,6 @@ public class SettingsActivity extends BaseActivity implements View.OnClickListen
     private String NetName = "";
     private String NetPassword = "";
     
-//    private CmdUtil util;
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -64,26 +60,27 @@ public class SettingsActivity extends BaseActivity implements View.OnClickListen
     @Override
     protected void onResume() {
         super.onResume();
-//        initData();
+        reg();
     }
 
     @Override
     protected void onDestroy() {
-        super.onDestroy();
         if (receiver != null) {
             unregisterReceiver(receiver);
         }
+        super.onDestroy();
     }
 
     @Override
     protected void initVariables() {
-        reg();
+//        reg();
 //        util = new CmdUtil(this);
-        MainActivity.util.setHandler(mHandler);
+//        MainActivity.util.setHandler(mHandler);
+        ActivityMain.setHandler(mHandler);
     }
 
     private void initData() {
-        List<ScanResult> list = MainActivity.util.mConnetListening.ConnectWifiScanResult();
+        List<ScanResult> list = /*MainActivity.util*/ActivityMain.mConnetListening.ConnectWifiScanResult();
         if (list == null || list.size() == 0) {
             CommUtils.showToast(this, "无可连接wifi");
             return;
@@ -130,7 +127,7 @@ public class SettingsActivity extends BaseActivity implements View.OnClickListen
 //                        CommUtils.showToast(SettingsActivity.this, "请选择设备");
                     } else {
                         DeviceName = devList[position];
-                        MainActivity.util.setSsid(DeviceName);
+//                        MainActivity.util.setSsid(DeviceName);
                     }
                 }
 
@@ -184,10 +181,10 @@ public class SettingsActivity extends BaseActivity implements View.OnClickListen
                 } else if (TextUtils.isEmpty(DevicePassword)) {
                     mDevPwdET.setError("请输入设备密码");
                 } else {
-                    if (MainActivity.util.mConnetListening.getConnectWifiSSID().contains(DeviceName)) {
+                    if (/*MainActivity.util*/ActivityMain.mConnetListening.getConnectWifiSSID().contains(DeviceName)) {
                         return;
                     } else {
-                        MainActivity.util.mConnetListening.ConnectWifi(DeviceName, DevicePassword, 3);
+                        /*MainActivity.util*/ActivityMain.mConnetListening.ConnectWifi(DeviceName, DevicePassword, 3);
                         if (mProgressDialog == null) {
                             mProgressDialog = ProgressDialog.show(this, "提示！", "正在连接设备：" + DeviceName + "...", true, true);
                             mProgressDialog.setCanceledOnTouchOutside(false);
@@ -204,7 +201,7 @@ public class SettingsActivity extends BaseActivity implements View.OnClickListen
                 } else if (TextUtils.isEmpty(NetPassword)) {
                     mWifiPwdET.setError("请输入网络密码");
                 } else {
-                    if (MainActivity.util.mConnetListening.getConnectWifiSSID().contains(DeviceName)) {
+                    if (/*MainActivity.util*/ActivityMain.mConnetListening.getConnectWifiSSID().contains(DeviceName)) {
                         if (mProgressDialog == null) {
                             mProgressDialog = ProgressDialog.show(this, "提示！", "正在连接网络：" + NetName + "...", true, true);
                             mProgressDialog.setCanceledOnTouchOutside(false);
@@ -239,7 +236,7 @@ public class SettingsActivity extends BaseActivity implements View.OnClickListen
             buf[i++] = buf1[j];
         }
         buf[i++] = (byte) 0x22;
-        MainActivity.util.mConnetListening.SendCmdCode(2, buf, buf.length, "255.255.255.255");
+        /*MainActivity.util*/ActivityMain.mConnetListening.SendCmdCode(2, buf, buf.length, "255.255.255.255");
     }
 
     public class MyReceiver extends BroadcastReceiver {
@@ -254,7 +251,7 @@ public class SettingsActivity extends BaseActivity implements View.OnClickListen
 
             }else if(wifiInfo.getState() ==  android.net.NetworkInfo.State.CONNECTED){
                 Log.e("MainActivity","wifiInfo.State.CONNECTED");
-                if(/*ActivityMain*/MainActivity.util.mConnetListening.getConnectWifiSSID().contains(DeviceName)){
+                if(/*MainActivity.util*/ActivityMain.mConnetListening.getConnectWifiSSID().contains(DeviceName)){
                     if(mProgressDialog != null){
                         mProgressDialog.dismiss();
                     }
@@ -277,7 +274,7 @@ public class SettingsActivity extends BaseActivity implements View.OnClickListen
                                 if (mCmdCheck.getCmdSetState() == 1) {
                                     mProgressDialog.cancel();
                                     mProgressDialog.dismiss();
-                                    MainActivity.util.mConnetListening.ConnectWifi(NetName, NetPassword, 3);//切换到局域网；
+                                    /*MainActivity.util*/ActivityMain.mConnetListening.ConnectWifi(NetName, NetPassword, 3);//切换到局域网；
                                     finish();
                                 } else if (mCmdCheck.getCmdSetState() == 2) {
                                     mProgressDialog.cancel();
