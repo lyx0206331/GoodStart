@@ -5,6 +5,7 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
+import android.util.Log;
 import android.widget.Toast;
 
 
@@ -128,6 +129,7 @@ public class NetTool {
         for (int i = 0; i < 256; i++) {//创建256个线程分别去ping
 
             j = i;
+//            LogUtil.e("NETTOOL", "scan index:" + j);
 
             new Thread(new Runnable() {
 
@@ -142,7 +144,7 @@ public class NetTool {
 
                         int result = proc.waitFor();
                         if (result == 0) {
-                            System.out.println("连接成功" + current_ip);
+                            Log.e("NETTOOL", "连接成功" + current_ip);
                             // 向服务器发送验证信息
                             String msg = sendMsg(current_ip, "scan" + getLocAddress() + " ( " + android.os.Build.MODEL + " ) ");
 

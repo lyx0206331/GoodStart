@@ -305,17 +305,21 @@ public class ConnetListening {
 	}
 
 	public void SendCmdCode(int code,byte[] buff,int len,String ip){
-//		mwifiAdmin = new WifiAdmin(context);
 		mWifiInfo = mwifiAdmin.getWifiInfo();
 		Log.e(TAG, "SendCmdCode > cmd:"+String.valueOf(code) + " --- ip : " + ip);
 		if(mCmdState != CMDSTATE_SENGSUCCESS)return;
 		if(mlistenState != LISTENING_CONNECTED)return;
-		if(ip.equals("")||ip == null){
-			Log.e(TAG, "SendCmdCode > ip:"+ip+"空！");
-			return;
-		}else if(ip.equals("0.0.0.0")||mWifiInfo.getSSID().contains("IYK_")){
-			ip = "192.168.4.1";
-			Log.e(TAG, "SendCmdCode > ip:"+ip);
+		try {
+			if(ip.equals("")||ip == null){
+				Log.e(TAG, "SendCmdCode > ip:"+ip+"空！");
+				return;
+			}else if(ip.equals("0.0.0.0")||mWifiInfo.getSSID().contains("IYK_")){
+				ip = "192.168.4.1";
+				Log.e(TAG, "SendCmdCode > ip:"+ip);
+			}
+
+		} catch (Exception e) {
+			e.printStackTrace();
 		}
 		int i = 0;
 		byte[] message = new byte[2048];
@@ -466,7 +470,9 @@ public class ConnetListening {
 					mlistenState = LISTENING_CONNECTFAILD;//发送数据
 					mHandler.obtainMessage(LISTENING_STATE_CHANGE, mlistenState, -1).sendToTarget();
 					break;
-				}
+				} catch (Exception e) {
+                    e.printStackTrace();
+                }
 				if(UDPResPacket.getLength() > 0){
 					Log.i(TAG, "UDPResPacket.getLength() > 0");
 					if(ReadCheck(UDPResPacket.getData(), UDPResPacket.getLength())){
@@ -517,7 +523,9 @@ public class ConnetListening {
 						mHandler.obtainMessage(LISTENING_MESSAGE_STATE, mMsgState, -1).sendToTarget();
 						UDPSendPacket = null;
 						Log.e(TAG, "sendUdpData(String sendStr, int port)....发送UDP数据包失败");
-					}
+					} catch (Exception e) {
+                        e.printStackTrace();
+                    }
 				}else if(mCmdState == CMDSTATE_SENGING){
 					if(mCmdCheck != null){
 						if(mCmdCheck.getCmd() == sendcmd+(byte)0x80){

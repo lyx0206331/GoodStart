@@ -12,7 +12,8 @@
     <TableLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content">
-        <TableRow>
+        <TableRow
+            android:visibility="gone">
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
@@ -23,7 +24,8 @@
                 android:layout_height="wrap_content"
                 android:layout_weight="1.0"/>
         </TableRow>
-        <TableRow>
+        <TableRow
+            android:visibility="gone">
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
@@ -36,7 +38,8 @@
                 android:singleLine="true"
                 android:inputType="textPassword"/>
         </TableRow>
-        <TableRow>
+        <TableRow
+            android:visibility="gone">
             <Button
                 android:id="@+id/btn_conn_dev"
                 android:layout_width="match_parent"

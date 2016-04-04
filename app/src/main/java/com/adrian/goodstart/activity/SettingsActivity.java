@@ -1,8 +1,11 @@
 package com.adrian.goodstart.activity;
 
+import android.app.AlertDialog;
 import android.app.ProgressDialog;
 import android.content.BroadcastReceiver;
+import android.content.ComponentName;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.net.ConnectivityManager;
@@ -12,6 +15,7 @@ import android.net.wifi.WifiManager;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
+import android.provider.Settings;
 import android.text.TextUtils;
 import android.util.Log;
 import android.view.View;
@@ -23,9 +27,13 @@ import android.widget.Spinner;
 import android.widget.Toast;
 
 import com.adrian.goodstart.R;
+import com.adrian.goodstart.application.MyApplication;
 import com.adrian.goodstart.tool.CmdCheck;
 import com.adrian.goodstart.tool.CommUtils;
 import com.adrian.goodstart.tool.ConnetListening;
+import com.adrian.goodstart.tool.DataUtil;
+import com.adrian.goodstart.tool.LogUtil;
+import com.adrian.goodstart.tool.SharePrefUtil;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -45,13 +53,17 @@ public class SettingsActivity extends BaseActivity implements View.OnClickListen
 
     private CmdCheck mCmdCheck;
     private ProgressDialog mProgressDialog = null;
-    private BroadcastReceiver receiver;
+    private LocalReceiver receiver;
     private String sname = "";
     private String DeviceName = "";
     private String DevicePassword = "";
     private String NetName = "";
     private String NetPassword = "";
-    
+
+    private AlertDialog connDialog;
+
+//    private DataUtil dataUtil;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -60,7 +72,6 @@ public class SettingsActivity extends BaseActivity implements View.OnClickListen
     @Override
     protected void onResume() {
         super.onResume();
-        reg();
     }
 
     @Override
@@ -68,14 +79,16 @@ public class SettingsActivity extends BaseActivity implements View.OnClickListen
         if (receiver != null) {
             unregisterReceiver(receiver);
         }
+        MyApplication.getInstance().setNoShare(false);
         super.onDestroy();
     }
 
     @Override
     protected void initVariables() {
-//        reg();
-//        util = new CmdUtil(this);
-//        MainActivity.util.setHandler(mHandler);
+
+        MyApplication.getInstance().addAct(this);
+
+        MyApplication.getInstance().setNoShare(true);
         ActivityMain.setHandler(mHandler);
     }
 
@@ -88,7 +101,7 @@ public class SettingsActivity extends BaseActivity implements View.OnClickListen
         List<String> devs = new ArrayList<>();
         List<String> wifis = new ArrayList<>();
         devs.add("请选择设备");
-        wifis.add("请选择网络");
+        wifis.add("请选择本地WIFI");
         for (ScanResult result :
                 list) {
             if (result.SSID.contains("IYK")) {
@@ -157,18 +170,44 @@ public class SettingsActivity extends BaseActivity implements View.OnClickListen
                 }
             });
         }
+
+        showConnDialog();
+    }
+
+    private void showConnDialog() {
+        if (devList == null || devList.length < 2) {
+            CommUtils.showToast(this, "未检测到远程遥控设备");
+            return;
+        }
+        if (connDialog == null) {
+            connDialog = new AlertDialog.Builder(this).setTitle("网络连接").setMessage("请先到网络设置页连接网络" + devList[1])
+                    .setNegativeButton("取消", new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialog, int which) {
+                            dialog.dismiss();
+                            finish();
+                        }
+                    })
+                    .setPositiveButton("确定", new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialog, int which) {
+                            startActivity(new Intent(Settings.ACTION_WIFI_SETTINGS)); //直接进入手机中的wifi网络设置界面
+                        }
+                    }).create();
+        }
+        connDialog.show();
     }
 
     @Override
     protected void loadData() {
-
+        reg();
     }
 
-    public void reg(){
-        receiver = new MyReceiver();
+    public void reg() {
+        receiver = new LocalReceiver();
         IntentFilter filter = new IntentFilter();
         filter.addAction(WifiManager.NETWORK_STATE_CHANGED_ACTION);
-        registerReceiver(receiver,filter);
+        registerReceiver(receiver, filter);
     }
 
     @Override
@@ -184,7 +223,8 @@ public class SettingsActivity extends BaseActivity implements View.OnClickListen
                     if (/*MainActivity.util*/ActivityMain.mConnetListening.getConnectWifiSSID().contains(DeviceName)) {
                         return;
                     } else {
-                        /*MainActivity.util*/ActivityMain.mConnetListening.ConnectWifi(DeviceName, DevicePassword, 3);
+                        /*MainActivity.util*/
+                        ActivityMain.mConnetListening.ConnectWifi(DeviceName, DevicePassword, 3);
                         if (mProgressDialog == null) {
                             mProgressDialog = ProgressDialog.show(this, "提示！", "正在连接设备：" + DeviceName + "...", true, true);
                             mProgressDialog.setCanceledOnTouchOutside(false);
@@ -200,6 +240,8 @@ public class SettingsActivity extends BaseActivity implements View.OnClickListen
                     CommUtils.showToast(this, "请选择网络");
                 } else if (TextUtils.isEmpty(NetPassword)) {
                     mWifiPwdET.setError("请输入网络密码");
+                } else if (!CommUtils.getWifiName(this).contains("IYK")) {
+                    showConnDialog();
                 } else {
                     if (/*MainActivity.util*/ActivityMain.mConnetListening.getConnectWifiSSID().contains(DeviceName)) {
                         if (mProgressDialog == null) {
@@ -236,23 +278,24 @@ public class SettingsActivity extends BaseActivity implements View.OnClickListen
             buf[i++] = buf1[j];
         }
         buf[i++] = (byte) 0x22;
-        /*MainActivity.util*/ActivityMain.mConnetListening.SendCmdCode(2, buf, buf.length, "255.255.255.255");
+        /*MainActivity.util*/
+        ActivityMain.mConnetListening.SendCmdCode(2, buf, buf.length, "255.255.255.255");
     }
 
-    public class MyReceiver extends BroadcastReceiver {
+    private class LocalReceiver extends BroadcastReceiver {
         @Override
         public void onReceive(Context context, Intent intent) {
             //Toast.makeText(context, intent.getAction(), 1).show();
 
             ConnectivityManager manager = (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE);
             NetworkInfo wifiInfo = manager.getNetworkInfo(ConnectivityManager.TYPE_WIFI);
-            if(wifiInfo.getState() !=  android.net.NetworkInfo.State.CONNECTED){
-                Log.e("MainActivity","!!!wifiInfo.State.CONNECTED");
+            if (wifiInfo.getState() != android.net.NetworkInfo.State.CONNECTED) {
+                Log.e("MainActivity", "!!!wifiInfo.State.CONNECTED");
 
-            }else if(wifiInfo.getState() ==  android.net.NetworkInfo.State.CONNECTED){
-                Log.e("MainActivity","wifiInfo.State.CONNECTED");
-                if(/*MainActivity.util*/ActivityMain.mConnetListening.getConnectWifiSSID().contains(DeviceName)){
-                    if(mProgressDialog != null){
+            } else if (wifiInfo.getState() == android.net.NetworkInfo.State.CONNECTED) {
+                Log.e("MainActivity", "wifiInfo.State.CONNECTED");
+                if (/*MainActivity.util*/ActivityMain.mConnetListening.getConnectWifiSSID().contains(DeviceName)) {
+                    if (mProgressDialog != null) {
                         mProgressDialog.dismiss();
                     }
                 }
@@ -272,10 +315,12 @@ public class SettingsActivity extends BaseActivity implements View.OnClickListen
                             mCmdCheck = new CmdCheck((byte[]) msg.obj, msg.arg2);
                             if (mCmdCheck.getCmd() == (byte) 0x82) {
                                 if (mCmdCheck.getCmdSetState() == 1) {
-                                    mProgressDialog.cancel();
-                                    mProgressDialog.dismiss();
-                                    /*MainActivity.util*/ActivityMain.mConnetListening.ConnectWifi(NetName, NetPassword, 3);//切换到局域网；
-                                    finish();
+                                    SharePrefUtil.setWifiSsid(SettingsActivity.this, NetName);
+//                                    mProgressDialog.cancel();
+//                                    mProgressDialog.dismiss();
+                                    ActivityMain.mConnetListening.ConnectWifi(NetName, NetPassword, 3);//切换到局域网；
+                                    LogUtil.e("TAG", "切换到局域网");
+//                                    finish();
                                 } else if (mCmdCheck.getCmdSetState() == 2) {
                                     mProgressDialog.cancel();
                                     mProgressDialog.dismiss();

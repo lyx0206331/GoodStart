@@ -23,7 +23,7 @@ public class MyService extends Service implements TransFileUtil.Callback {
     @Override
     public void onCreate() {
         super.onCreate();
-        CommUtils.showToast(this, "create service");
+//        CommUtils.showToast(this, "create service");
     }
 
     @Override
@@ -35,7 +35,7 @@ public class MyService extends Service implements TransFileUtil.Callback {
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
 //        showLoadingDialog("asdfasdfasdfsadfsdf");
-        CommUtils.showToast(this, "start command");
+//        CommUtils.showToast(this, "start command");
         if (tcpUtil == null) {
             tcpUtil = new TransFileUtil();
             tcpUtil.setCallback(this);

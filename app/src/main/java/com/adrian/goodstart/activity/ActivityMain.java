@@ -18,8 +18,10 @@ import android.widget.Button;
 import android.widget.Toast;
 
 import com.adrian.goodstart.R;
+import com.adrian.goodstart.application.MyApplication;
 import com.adrian.goodstart.pojo.Cmd;
 import com.adrian.goodstart.tool.CmdCheck;
+import com.adrian.goodstart.tool.CommUtils;
 import com.adrian.goodstart.tool.ConnetListening;
 import com.adrian.goodstart.tool.DataUtil;
 import com.adrian.goodstart.tool.NetTool;
@@ -57,6 +59,7 @@ public class ActivityMain extends BaseActivity {
     private ProgressDialog mProgressDialog = null;
 
     private DataUtil dataUtil;
+    private NetTool netTool;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState){
@@ -103,6 +106,22 @@ public class ActivityMain extends BaseActivity {
 		Button b315d = (Button)findViewById(R.id.button_315d);
 		b315d.setOnClickListener(new m315onclick());
 
+        Button mLearnA = (Button) findViewById(R.id.button_learnA);
+        Button mLearnB = (Button) findViewById(R.id.button_learnB);
+        mLearnA.setOnClickListener(new OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                dataUtil.clearCmdBytes();
+                learnShortRed(R.id.button_shortredA);
+            }
+        });
+        mLearnB.setOnClickListener(new OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                learnShortRed(R.id.button_shortredB);
+            }
+        });
+
 		Button bshortredA = (Button)findViewById(R.id.button_shortredA);
 		bshortredA.setOnClickListener(new OnClickListener() {
 
@@ -110,7 +129,9 @@ public class ActivityMain extends BaseActivity {
 			public void onClick(View v) {
 				// TODO Auto-generated method stub
                 bshortredid = v.getId();
-                if (bshortredflagA) {
+                shortredcodeA = dataUtil.getCmdBytes(0);
+                ip = dataUtil.getIp();
+                if (bshortredflagA || (shortredcodeA != null && shortredcodeA.length > 0)) {
                     mConnetListening.SendCmdCode(0x32, shortredcodeA, shortredcodeA.length, ip);
                 } else {
                     final byte[] buf = null;
@@ -128,7 +149,9 @@ public class ActivityMain extends BaseActivity {
 				// TODO Auto-generated method stub
 
                 bshortredid = v.getId();
-                if (bshortredflagB) {
+                shortredcodeB = dataUtil.getCmdBytes(1);
+                ip = dataUtil.getIp();
+                if (bshortredflagB || (shortredcodeB != null && shortredcodeB.length > 0)) {
                     mConnetListening.SendCmdCode(0x32, shortredcodeB, shortredcodeB.length, ip);
                 } else {
                     final byte[] buf = null;
@@ -163,7 +186,7 @@ public class ActivityMain extends BaseActivity {
 				// TODO Auto-generated method stub
 				blongredid = v.getId();
 				if(blongredflagB){
-					mConnetListening.SendCmdCode(0x09,longredcodeB,longredcodeB.length,ip);
+					mConnetListening.SendCmdCode(0x09, longredcodeB, longredcodeB.length, ip);
 				}else{
 					final byte[] buf = null;
 					if(ip == null||ip.equals(""))return;
@@ -231,11 +254,26 @@ public class ActivityMain extends BaseActivity {
 		mSendBtn.setOnClickListener(new OnClickListener() {
 			@Override
 			public void onClick(View v) {
-				NetTool tool = new NetTool(ActivityMain.this);
-				tool.scan();
+                MyApplication.getInstance().sharePic();
 			}
 		});
+
 	}
+
+    /**
+     * 短红外学习
+     * @param id
+     */
+    private void learnShortRed(int id) {
+        bshortredid = id;
+        String ip = dataUtil.getIp();
+        final byte[] buf = null;
+        if (TextUtils.isEmpty(ip)) {
+            CommUtils.showToast(this, "请先连接遥控器");
+            return;
+        }
+        mConnetListening.SendCmdCode(0x30, buf, 0, ip);
+    }
 
     private class m315onclick implements OnClickListener {
         @Override

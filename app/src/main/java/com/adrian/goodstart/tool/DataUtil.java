@@ -92,6 +92,15 @@ public class DataUtil {
         return cmd.getCmd();
     }
 
+    public void clearCmdBytes() {
+        List<Cmd> cmds = getCmds();
+        for (Cmd cmd :
+                cmds) {
+            cmd.setCmd(null);
+            cmdDao.update(cmd);
+        }
+    }
+
     public String getSsid() {
 //        return ssid;
         Cmd cmd = getCmd(0);
@@ -132,11 +141,17 @@ public class DataUtil {
 
     public void clear() {
         cmdDao.deleteAll();
+        Log.e("DATA", "clear data");
+        printCmds();
     }
 
     public void printCmds() {
         Log.e("DATA", "print data");
         List<Cmd> cmds = getCmds();
+        if (cmds == null || cmds.size() == 0) {
+            Log.e("DATA", "no data");
+            return;
+        }
         for (Cmd cmd :
                 cmds) {
             Log.e("DATA", cmd.toString());

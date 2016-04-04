@@ -134,10 +134,37 @@
         android:text="连接遥控器" />
 
     <LinearLayout
-        android:id="@+id/Layout_redshort"
+        android:id="@+id/Layout_learn"
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
         android:layout_below="@id/button_getip"
+        android:baselineAligned="false"
+        android:orientation="horizontal">
+
+        <Button
+            android:id="@+id/button_learnA"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="10dp"
+            android:layout_marginRight="5dp"
+            android:layout_weight="1"
+            android:text="开(学习)" />
+
+        <Button
+            android:id="@+id/button_learnB"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="5dp"
+            android:layout_marginRight="10dp"
+            android:layout_weight="1"
+            android:text="关(学习)" />
+    </LinearLayout>
+
+    <LinearLayout
+        android:id="@+id/Layout_redshort"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/Layout_learn"
         android:baselineAligned="false"
         android:orientation="horizontal">
 

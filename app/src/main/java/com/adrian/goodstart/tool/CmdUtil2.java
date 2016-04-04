@@ -16,7 +16,7 @@ import com.adrian.goodstart.R;
 public class CmdUtil2 {
     private Context context;
 
-    public static ConnetListening mConnetListening = null;
+    public ConnetListening mConnetListening = null;
     private CmdCheck mCmdCheck;
     public static byte[] shortredcodeA = new byte[512], shortredcodeB = new byte[512];
     private byte[] zuheredcodeA = new byte[512], zuheredcodeB = new byte[512], zuheredcodeC = new byte[512], zuheredcodeD = new byte[512];
@@ -65,7 +65,11 @@ public class CmdUtil2 {
                         case ConnetListening.MESSAGE_READSUCCESS:
 
                             mCmdCheck = new CmdCheck((byte[]) msg.obj, msg.arg2);
-                            CmdCheckState(mCmdCheck.getCmd());
+                            try {
+                                CmdCheckState(mCmdCheck.getCmd());
+                            } catch (Exception e){
+                                e.printStackTrace();
+                            }
                             Log.e("ActivityMain", "MESSAGE_READSUCCESS" + (mCmdCheck.getCmd() & 0xff));
 //                            if (mmHandler != null) {
 //                                mmHandler.obtainMessage(msg.what, msg.arg1, msg.arg2, msg.obj).sendToTarget();
